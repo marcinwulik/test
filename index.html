@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Notatnik - 21 sekcji z wysyłką maila</title>
+  <style>
+    /* Globalne style */
+    body {
+      font-family: Arial, sans-serif;
+      background: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+    nav {
+      background: #333;
+      padding: 10px;
+      text-align: center;
+    }
+    nav a {
+      display: inline-block;
+      color: #f2f2f2;
+      text-decoration: none;
+      margin: 5px 10px;
+      padding: 8px 12px;
+      background: #555;
+      border-radius: 4px;
+      transition: background 0.3s;
+    }
+    nav a:hover {
+      background: #777;
+    }
+    .image-section {
+      text-align: center;
+      margin: 20px auto;
+    }
+    .image-section img {
+      max-width: 150px;
+      height: auto;
+      border: 2px solid #333;
+      border-radius: 5px;
+    }
+    .email-container {
+      text-align: center;
+      margin: 20px auto;
+      padding: 20px;
+      background: #fff;
+      border-top: 1px solid #ccc;
+    }
+    .email-container input[type="email"],
+    .email-container textarea {
+      padding: 10px;
+      font-size: 16px;
+      margin-bottom: 10px;
+      width: 250px;
+      box-sizing: border-box;
+    }
+    .email-container textarea {
+      height: 100px;
+      resize: vertical;
+    }
+    .email-container button {
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #4CAF50;
+      border: none;
+      color: #fff;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .email-container button:hover {
+      background-color: #45a049;
+    }
+    /* Pełnoekranowy edytor (modal) */
+    .full-screen-editor {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.9);
+      z-index: 1000;
+      padding: 20px;
+      box-sizing: border-box;
+      color: #fff;
+    }
+    .full-screen-editor h2 {
+      margin-top: 0;
+    }
+    .full-screen-editor textarea {
+      width: 100%;
+      height: 70%;
+      background: #222;
+      color: #fff;
+      border: none;
+      padding: 10px;
+      box-sizing: border-box;
+      font-family: monospace;
+      font-size: 16px;
+      resize: none;
+    }
+    .full-screen-editor button {
+      background: #4CAF50;
+      border: none;
+      color: #fff;
+      padding: 10px 20px;
+      margin: 10px 5px 0 0;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+    .full-screen-editor button:hover {
+      background: #45a049;
+    }
+  </style>
+  <!-- Biblioteka EmailJS -->
+  <script type="text/javascript" src="https://cdn.emailjs.com/sdk/2.3.2/email.min.js"></script>
+  <script type="text/javascript">
+    // Inicjalizacja EmailJS – podmień YOUR_USER_ID na swój identyfikator
+    (function(){
+      emailjs.init("hSldRRIMHvjG9RmYc");
+    })();
+  </script>
+</head>
+<body>
+
+<!-- Pasek nawigacyjny z 21 linkami -->
+<nav id="navLinks">
+  <!-- Linki generowane przez JavaScript -->
+</nav>
+
+<!-- Sekcja z obrazkiem (kot.jpg) -->
+<div class="image-section">
+  <h3>Obrazek</h3>
+  <img src="kot.jpg" alt="Kot">
+</div>
+
+<!-- Sekcja wysyłania maila (używamy zawartości sekcji 21) -->
+<div class="email-container">
+  <h3>Wyślij zawartość sekcji 21 na maila</h3>
+  <input type="email" id="user_email" placeholder="Wpisz swój email">
+  <br>
+  <textarea id="additionalText" placeholder="Opcjonalny dodatkowy tekst"></textarea>
+  <br>
+  <button onclick="sendEmail()">Wyślij</button>
+</div>
+
+<!-- Pełnoekranowy edytor (modal) -->
+<div id="fullScreenEditor" class="full-screen-editor">
+  <h2 id="editorTitle">Edytor sekcji</h2>
+  <textarea id="editorTextarea"></textarea>
+  <br>
+  <button onclick="saveContent()">Zapisz</button>
+  <button onclick="closeEditor()">Zamknij</button>
+</div>
+
+<script>
+  // Generujemy 21 linków w pasku nawigacyjnym
+  const navLinksContainer = document.getElementById('navLinks');
+  for (let i = 1; i <= 21; i++) {
+    const link = document.createElement('a');
+    link.href = "#";
+    link.textContent = i;
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      openEditor(i);
+    });
+    navLinksContainer.appendChild(link);
+  }
+
+  // Otwiera pełnoekranowy edytor dla danej sekcji
+  function openEditor(sectionNumber) {
+    const editor = document.getElementById('fullScreenEditor');
+    const textarea = document.getElementById('editorTextarea');
+    const title = document.getElementById('editorTitle');
+    title.textContent = "Edytor sekcji " + sectionNumber;
+    // Wczytujemy zawartość danej sekcji z localStorage (jeśli istnieje)
+    const content = localStorage.getItem('section' + sectionNumber) || "";
+    textarea.value = content;
+    textarea.setAttribute('data-section', sectionNumber);
+    editor.style.display = 'block';
+    textarea.focus();
+  }
+
+  // Zamykamy edytor
+  function closeEditor() {
+    document.getElementById('fullScreenEditor').style.display = 'none';
+  }
+
+  // Zapisujemy zawartość edytora do localStorage
+  function saveContent() {
+    const textarea = document.getElementById('editorTextarea');
+    const sectionNumber = textarea.getAttribute('data-section');
+    localStorage.setItem('section' + sectionNumber, textarea.value);
+    alert("Zapisano zawartość sekcji " + sectionNumber);
+    closeEditor();
+  }
+
+  // Obsługa klawisza Tab w polu tekstowym edytora
+  document.getElementById('editorTextarea').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      let start = this.selectionStart;
+      let end = this.selectionEnd;
+      // Wstawienie znaku tabulacji
+      this.value = this.value.substring(0, start) + "\t" + this.value.substring(end);
+      this.selectionStart = this.selectionEnd = start + 1;
+    }
+  });
+
+  // Funkcja wysyłająca email przy użyciu EmailJS – wysyłamy tylko zawartość sekcji 21
+  function sendEmail() {
+    const email = document.getElementById("user_email").value;
+    if (!email) {
+      alert("Podaj prawidłowy adres email!");
+      return;
+    }
+    
+    // Pobieramy zawartość sekcji 21
+    let sectionContent = localStorage.getItem('section21') || "";
+    // Pobieramy dodatkowy tekst, jeśli został wpisany
+    let additionalText = document.getElementById('additionalText').value || "";
+    
+    // Łączymy zawartość sekcji 21 z opcjonalnym dodatkowym tekstem
+    let messageContent = "Zawartość sekcji 21:\n\n" + sectionContent;
+    if(additionalText.trim() !== ""){
+      messageContent += "\n\nDodatkowy tekst:\n" + additionalText;
+    }
+
+    var templateParams = {
+      to_email: email,
+      message: messageContent
+    };
+
+    // Podmień 'YOUR_SERVICE_ID' oraz 'YOUR_TEMPLATE_ID' na dane ze swojego konta EmailJS
+    emailjs.send("service_g93frd8", "template_sl5sd0h", templateParams)
+      .then(function(response) {
+        alert("Email wysłany pomyślnie!");
+      }, function(error) {
+        alert("Wysyłanie nie powiodło się. Spróbuj ponownie później.");
+      });
+  }
+</script>
+
+</body>
+</html>
